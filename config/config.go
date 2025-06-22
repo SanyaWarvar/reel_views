@@ -96,6 +96,12 @@ func NewConfig(configDir string) (*Config, error) {
 		}
 	}
 
+	if _, err := os.Stat("./etc/secrets/.env"); err == nil {
+		if err := godotenv.Load(".env"); err != nil {
+			return nil, fmt.Errorf("failed to load .env file: %w", err)
+		}
+	}
+
 	err := cleanenv.ReadConfig(configDir, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
