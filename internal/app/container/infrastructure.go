@@ -22,7 +22,6 @@ func (c *Container) Migrate() error {
 		c.cfg.Postgres.DBName,
 		c.cfg.Postgres.Schema,
 		c.cfg.Postgres.SSLMode,
-		c.cfg.Postgres.SSLRootCert,
 	)
 	conf := migrator.Config{
 		MigrationsDirPath: "migrations",
@@ -98,8 +97,7 @@ func (c *Container) getDBPool() *postgres.Pool {
 			c.getConfig().Postgres.Port,
 			c.getConfig().Postgres.DBName,
 			c.getConfig().Postgres.Schema,
-			c.getConfig().Postgres.SSLMode,
-			c.getConfig().Postgres.SSLRootCert),
+			c.getConfig().Postgres.SSLMode),
 			postgres.MaxPoolSize(c.getConfig().Postgres.PoolMax),
 			postgres.MinPoolSize(c.getConfig().Postgres.PoolMin),
 			postgres.ConnMaxLifetime(c.getConfig().Postgres.ConnectionMaxLifeTime),

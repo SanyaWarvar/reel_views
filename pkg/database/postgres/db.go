@@ -42,16 +42,15 @@ func GetCompleteUrl(userName, password, host, port, DBName, schema, sslMode, ssl
 		schema)
 }
 
-func GetCompleteDsn(userName, password, host, port, DBName, schema, sslMode, sslRootCert string) string {
-	str := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s search_path=%s sslmode=%s sslrootcert=%s",
+func GetCompleteDsn(userName, password, host, port, DBName, schema, sslMode string) string {
+	str := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s search_path=%s sslmode=%s",
 		userName,
 		password,
 		host,
 		port,
 		DBName,
 		schema,
-		sslMode,
-		sslRootCert)
+		sslMode)
 	return str
 }
 
