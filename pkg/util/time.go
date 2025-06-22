@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -17,7 +16,7 @@ func GetCurrentUTCTime() time.Time {
 func ConvertStringToTime(timeStr string) (*time.Time, error) {
 	t, err := time.Parse(time.RFC3339, timeStr)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("cant convert string {%s} to time", timeStr))
+		return nil, fmt.Errorf("cant convert string {%s} to time", timeStr)
 	}
 	return &t, nil
 }

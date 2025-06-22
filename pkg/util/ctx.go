@@ -2,10 +2,10 @@ package util
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"rv/pkg/constants"
+
+	"github.com/google/uuid"
 )
 
 func GetUserRole(c context.Context) (string, error) {
@@ -20,7 +20,7 @@ func GetUserId(c context.Context) (uuid.UUID, error) {
 	return *id, nil
 }
 
-func CopyContextValues(parentCtx context.Context, keys ...interface{}) context.Context {
+func CopyContextValues(parentCtx context.Context, keys ...any) context.Context {
 	newCtx := context.Background()
 	for _, key := range keys {
 		if value := parentCtx.Value(key); value != nil {
@@ -57,7 +57,7 @@ func GetSpan(c context.Context) (string, error) {
 func getStringFromContext(c context.Context, context string) (string, error) {
 	val, ok := c.Value(context).(string)
 	if !ok {
-		return "", errors.New(fmt.Sprintf("cant convert %s to string", context))
+		return "", fmt.Errorf("cant convert %s to string", context)
 	}
 	return val, nil
 }
@@ -69,7 +69,7 @@ func getUUIDFromContext(c context.Context, context string) (*uuid.UUID, error) {
 	}
 	id, err := UUIDFromString(idFromCtx)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("cant deserialise id %s", context))
+		return nil, fmt.Errorf("cant deserialise id %s", context)
 	}
 	return &id, nil
 }

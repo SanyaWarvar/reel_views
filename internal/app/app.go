@@ -20,10 +20,9 @@ func Run(cfg *config.Config) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
-	select {
-	case s := <-interrupt:
-		log.Printf("app - Start - signal: " + s.String())
-	}
+	s := <-interrupt
+	log.Printf("app - Start - signal: " + s.String())
+
 	if err := cnt.Stop(); err != nil {
 		log.Printf("Stop: %v", err)
 	}
