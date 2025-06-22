@@ -1,0 +1,37 @@
+http:
+  port: 80
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+postgres:
+  username: "postgres"
+  host: "localhost"
+  port: "5432"
+  dbname: "postgres"
+  sslmode: "disable"
+  password: "postgres"
+  schema: "public"
+  poolMax: 50
+  poolMin: 20
+  healthCheckPeriod: 10s
+  connectionMaxIdleTime: 600s
+  connectionMaxLifeTime: 1800s
+
+log:
+  level: "INFO"
+  requestLogEnabled: true
+  requestLogWithBody: true
+
+internal:
+  path: "/rl"
+  environment: "develop"
+  logInputParamOnErr: true
+
+cache:
+  url: "localhost:6379"
+  username: ""
+  password: ""
+
+response:
+  exportError: true
