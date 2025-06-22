@@ -19,6 +19,7 @@ var (
 	TokenDontExist   = apperror.NewInvalidDataError("token dont exist", "token_dont_exist")
 
 	NoNewPassword = apperror.NewBadRequestError("no new password", "no_new_password")
+	NotUnique     = apperror.NewInvalidDataError("not unique", "not_unique")
 )
 
 // коды динамических ошибок:

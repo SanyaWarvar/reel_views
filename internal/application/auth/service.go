@@ -61,7 +61,6 @@ func NewService(
 }
 
 // todo add check is confirmed email
-// todo add unique user email, username
 
 func (srv *Service) SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*dto.SendCodeResponse, error) {
 	_, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)

@@ -1,4 +1,4 @@
-DROP TABLE roles;
+DROP TABLE IF EXISTS roles;
 CREATE TABLE IF NOT EXISTS roles(
     id int primary key,
     name varchar not null,
@@ -11,8 +11,8 @@ INSERT INTO roles VALUES
 
 CREATE TABLE IF NOT EXISTS users(
     id uuid primary key,
-    username varchar not null,
-    email varchar not null,
+    username varchar unique not null,
+    email varchar unique not null,
     password varchar not null,
     role varchar not null,
     img_url varchar not null,

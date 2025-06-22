@@ -6,6 +6,10 @@ import (
 	"rv/internal/app"
 )
 
+// @title           REEL VIEWS API
+// @version         1.0
+// @description     This is reel views api service.
+
 const configDir = "./config/main.yaml"
 
 func main() {

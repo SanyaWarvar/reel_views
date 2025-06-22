@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 	"database/sql"
+	apperrors "rv/internal/errors"
+	"rv/internal/infrastructure/repository/common"
 	"rv/pkg/database/postgres"
 
 	"github.com/google/uuid"
@@ -25,6 +27,11 @@ func (repo *Repository) CreateUser(ctx context.Context, item *User) error {
 		($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 	_, err := repo.conn.Exec(ctx, query, item.Id, item.Username, item.Email, item.Password, item.Role, item.ImgUrl, item.ConfirmedEmail, item.CreatedAt)
+	if err != nil {
+		if common.IsUniqueErr(err) {
+			return apperrors.NotUnique
+		}
+	}
 	return err
 }
 
@@ -57,6 +64,9 @@ func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, update
 
 	_, err = repo.conn.Exec(ctx, query, args...)
 	if err != nil {
+		if common.IsUniqueErr(err) {
+			return apperrors.NotUnique
+		}
 		return errors.Wrap(err, "repo.conn.Exec")
 	}
 
@@ -89,6 +99,9 @@ func (repo *Repository) GetUser(ctx context.Context, filter UserFilter) (*User, 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &output, false, nil
+		}
+		if common.IsUniqueErr(err) {
+			return &output, false, apperrors.NotUnique
 		}
 		return &output, false, errors.Wrap(err, "repo.conn.QueryRow.Scan")
 	}

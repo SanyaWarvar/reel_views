@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// UserTokens
+// @schema
 type UserTokens struct {
 	Access  string `json:"accessToken" binding:"required"`
 	Refresh string `json:"refreshToken" binding:"required"`

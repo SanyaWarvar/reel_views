@@ -41,7 +41,13 @@ func (k *Kernel) Init() *gin.Engine {
 	router := gin.New()
 	gin.SetMode(gin.DebugMode)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.StaticFile("/swagger.json", "./docs/swagger.json")
+	router.StaticFile("/swagger.yaml", "./docs/swagger.yaml")
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		ginSwagger.URL("/swagger.json"),
+	))
 
 	router.Use(
 		gin.Recovery(),

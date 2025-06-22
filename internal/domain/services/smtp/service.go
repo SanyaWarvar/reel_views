@@ -11,7 +11,6 @@ import (
 	apperrors "rv/internal/errors"
 	"rv/pkg/applogger"
 	"rv/pkg/util"
-	"strconv"
 	"time"
 )
 
@@ -81,9 +80,8 @@ func (srv *Service) SendMessage(email, messageText, title string) error {
 }
 
 func (srv *Service) GenerateConfirmCode(action enum.EmailCodeAction) *auth.ConfirmationCode {
-	code := rand.Intn(int(math.Pow10(srv.cfg.CodeLenght)))
 	return &auth.ConfirmationCode{
-		Code:      strconv.Itoa(code),
+		Code:      fmt.Sprintf("%0*d", srv.cfg.CodeLenght, rand.Intn(int(math.Pow10(srv.cfg.CodeLenght)))),
 		Action:    action,
 		CreatedAt: util.GetCurrentUTCTime(),
 	}

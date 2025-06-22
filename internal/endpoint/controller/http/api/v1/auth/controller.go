@@ -12,11 +12,10 @@ import (
 	"rv/pkg/response"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type userService interface {
-	RegisterUser(ctx context.Context, credentials request.RegisterCredentials) (uuid.UUID, error)
+	RegisterUser(ctx context.Context, credentials request.RegisterCredentials) (*resp.RegisterResponse, error)
 }
 
 type authService interface {
@@ -56,6 +55,16 @@ func (h *Controller) Init(api *gin.RouterGroup) {
 	}
 }
 
+// @Summary register_user
+// @Description register new user
+// @Tags auth
+// @Produce json
+// @Param data body request.RegisterCredentials true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=resp.RegisterResponse}
+// @Failure 400 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/register [post]
 func (h *Controller) register(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.RegisterCredentials
@@ -73,6 +82,16 @@ func (h *Controller) register(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, userId))
 }
 
+// @Summary send_confirm_code
+// @Description register new user
+// @Tags auth
+// @Produce json
+// @Param data body request.LoginRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=resp.SendCodeResponse}
+// @Failure 400 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/code [post]
 func (h *Controller) sendCode(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.LoginRequest
@@ -94,6 +113,16 @@ func (h *Controller) sendCode(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
 }
 
+// @Summary confirm_code
+// @Description Подтверждение кода для подтверждения почты, либо сброса пароля. Если сброс пароля, то newPassword обязательное поле.
+// @Tags auth
+// @Produce json
+// @Param data body request.ConfimationCodeRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/confirm [post]
 func (h *Controller) confirmCode(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.ConfimationCodeRequest
@@ -111,6 +140,17 @@ func (h *Controller) confirmCode(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
 }
 
+// @Summary login
+// @Description Получение access,refresh токенов по почте и паролю
+// @Tags auth
+// @Produce json
+// @Param data body request.LoginRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=token.UserTokens}
+// @Failure 400 {object} response.Response{}
+// @Failure 401 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/login [post]
 func (h *Controller) login(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.LoginRequest
@@ -128,6 +168,16 @@ func (h *Controller) login(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, tokens))
 }
 
+// @Summary refresh_tokens
+// @Description Получение access,refresh токенов по access, refresh токенам
+// @Tags auth
+// @Produce json
+// @Param data body token.UserTokens true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=token.UserTokens}
+// @Failure 400 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/refresh [post]
 func (h *Controller) refreshTokens(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req token.UserTokens
@@ -145,6 +195,16 @@ func (h *Controller) refreshTokens(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, tokens))
 }
 
+// @Summary forgot_password
+// @Description Сброс пароля
+// @Tags auth
+// @Produce json
+// @Param data body request.LoginRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=resp.SendCodeResponse}
+// @Failure 400 {object} response.Response{}
+// @Failure 422 {object} response.Response{}
+// @Router /rl/api/v1/auth/forgot [post]
 func (h *Controller) forgotPassword(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.LoginRequest
@@ -161,37 +221,3 @@ func (h *Controller) forgotPassword(c *gin.Context) {
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
 }
-
-/*
-// @Summary Get match demo
-// @Description Get match demo
-// @Tags Matches
-// @Produce json
-// @Param Authorization header string true "Access token" default(Bearer <token>)
-// @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=dto.DemoUrl}
-// @Failure 401 {object} response.Response{}
-// @Failure 403 {object} response.Response{}
-// @Failure 410 {object} response.Response{}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
-// @Failure 500 {object} response.Response{}
-// @Router /match/:id/demo [get]
-func (h *Controller) getDemoUrl(c *gin.Context) {
-	id, err := util.UUIDFromString(c.Param("id"))
-	if err != nil {
-		_ = c.Error(apperror.NewBadRequestError(err))
-		return
-	}
-
-	ctx := c.Request.Context()
-
-	users, err := h.srv.GetMatchDemoUrl(ctx, id)
-	if err != nil {
-		_ = c.Error(err)
-		return
-	}
-
-	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, users))
-}
-*/

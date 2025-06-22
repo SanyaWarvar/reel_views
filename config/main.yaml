@@ -41,7 +41,7 @@ email:
   addres: "smtp.gmail.com:587"
   codeLenght: 6
   codeExp: "5m"
-  minTTL: "4m"
+  minTTL: "5m"
 
 jwt:
   accessTtl: "100h"
