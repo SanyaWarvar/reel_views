@@ -4,6 +4,8 @@ import (
 	"context"
 	"rv/internal/domain/dto/request"
 	resp "rv/internal/domain/dto/response"
+	"rv/internal/domain/enum"
+	"rv/internal/domain/services/token"
 	"rv/pkg/apperror"
 	"rv/pkg/applogger"
 	"rv/pkg/constants"
@@ -18,8 +20,10 @@ type userService interface {
 }
 
 type authService interface {
-	SendConfirmationCode(ctx context.Context, req request.SendCodeRequest) (*resp.SendCodeResponse, error)
+	SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*resp.SendCodeResponse, error)
 	ConfirmCode(ctx context.Context, req request.ConfimationCodeRequest) error
+	Login(ctx context.Context, req request.LoginRequest) (*token.UserTokens, error)
+	RefreshTokens(ctx context.Context, req token.UserTokens) (*token.UserTokens, error)
 }
 
 type Controller struct {
@@ -44,11 +48,11 @@ func (h *Controller) Init(api *gin.RouterGroup) {
 	auth := api.Group("/auth")
 	{
 		auth.POST("/register", h.register)
-		//auth.POST("/login", h.login)
+		auth.POST("/login", h.login)
 		auth.POST("/code", h.sendCode)
 		auth.POST("/confirm", h.confirmCode)
-		//auth.POST("/refresh", h.refreshTokens)
-		//auth.POST("/forgot", h.forgotPassword)
+		auth.POST("/refresh", h.refreshTokens)
+		auth.POST("/forgot", h.forgotPassword)
 	}
 }
 
@@ -71,13 +75,17 @@ func (h *Controller) register(c *gin.Context) {
 
 func (h *Controller) sendCode(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.SendCodeRequest
+	var req request.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
 		return
 	}
-	resp, err := h.authService.SendConfirmationCode(ctx, req)
+	if req.Password == "" {
+		_ = c.Error(apperror.NewBadRequestError("password cant be empty", constants.BindBodyError))
+		return
+	}
+	resp, err := h.authService.SendConfirmationCode(ctx, req, enum.ConfirmCode)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -101,6 +109,57 @@ func (h *Controller) confirmCode(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+func (h *Controller) login(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.LoginRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	tokens, err := h.authService.Login(ctx, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, tokens))
+}
+
+func (h *Controller) refreshTokens(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req token.UserTokens
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	tokens, err := h.authService.RefreshTokens(ctx, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, tokens))
+}
+
+func (h *Controller) forgotPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.LoginRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	resp, err := h.authService.SendConfirmationCode(ctx, req, enum.ForgotPassword)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
 }
 
 /*

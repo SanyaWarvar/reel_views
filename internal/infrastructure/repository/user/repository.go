@@ -24,11 +24,11 @@ func (repo *Repository) CreateUser(ctx context.Context, item *User) error {
 		INSERT INTO users VALUES
 		($1, $2, $3, $4, $5, $6, $7, $8)
 	`
-	_, err := repo.conn.Exec(ctx, query, item.Id, item.Username, item.Email, item.Password, item.RoleId, item.ImgUrl, item.ConfirmedEmail, item.CreatedAt)
+	_, err := repo.conn.Exec(ctx, query, item.Id, item.Username, item.Email, item.Password, item.Role, item.ImgUrl, item.ConfirmedEmail, item.CreatedAt)
 	return err
 }
 
-func (repo *Repository) UpdateUser(ctx context.Context,userId uuid.UUID,updateParams *UserUpdateParams) error {
+func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *UserUpdateParams) error {
 
 	builder := squirrel.Update("users").
 		Where(squirrel.Eq{"id": userId}).
@@ -84,7 +84,7 @@ func (repo *Repository) GetUser(ctx context.Context, filter UserFilter) (*User, 
 		return nil, false, errors.Wrap(err, "squirrel.ToSql")
 	}
 	err = repo.conn.QueryRow(ctx, query, args...).
-		Scan(&output.Id, &output.Username, &output.Email, &output.Password, &output.RoleId, &output.ImgUrl, &output.ConfirmedEmail, &output.CreatedAt)
+		Scan(&output.Id, &output.Username, &output.Email, &output.Password, &output.Role, &output.ImgUrl, &output.ConfirmedEmail, &output.CreatedAt)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

@@ -9,6 +9,7 @@ type UserFilter struct {
 	Limit uint64
 }
 
+// пароль передавать незахешированным. На уровне сервиса произойдет хеш
 type UserUpdateParams struct {
 	Username       *string
 	Email          *string

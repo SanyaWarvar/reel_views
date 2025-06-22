@@ -1,3 +1,4 @@
+DROP TABLE roles;
 CREATE TABLE IF NOT EXISTS roles(
     id int primary key,
     name varchar not null,
@@ -13,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users(
     username varchar not null,
     email varchar not null,
     password varchar not null,
-    role_id int not null,
+    role varchar not null,
     img_url varchar not null,
     confirmed_email boolean default 'f',
     created_at timestamptz not null

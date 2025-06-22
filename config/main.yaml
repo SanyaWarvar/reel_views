@@ -42,3 +42,7 @@ email:
   codeLenght: 6
   codeExp: "5m"
   minTTL: "4m"
+
+jwt:
+  accessTtl: "100h"
+  refreshTtl: "100h"

@@ -2,9 +2,13 @@ package auth
 
 import (
 	"context"
+	"rv/internal/domain/dto/auth"
 	"rv/internal/domain/dto/request"
 	dto "rv/internal/domain/dto/response"
 	"rv/internal/domain/dto/user"
+	"rv/internal/domain/enum"
+	"rv/internal/domain/services/token"
+	apperrors "rv/internal/errors"
 	userRepository "rv/internal/infrastructure/repository/user"
 	"rv/pkg/applogger"
 	"rv/pkg/trx"
@@ -20,17 +24,24 @@ type userService interface {
 	UpdateUser(ctx context.Context, userId uuid.UUID, filter *userRepository.UserUpdateParams) error
 }
 
+type tokenService interface {
+	GenerateUserTokens(ctx context.Context, id uuid.UUID, role string) (*token.UserTokens, error)
+	ParseToken(token string) (*token.CustomClaims, error)
+	RefreshTokens(ctx context.Context, access, refresh string) (*token.UserTokens, error)
+}
+
 type smtpService interface {
-	SendConfirmEmailCode(ctx context.Context, email string) error
-	ConfirmCode(ctx context.Context, email string, code string) error
+	SendConfirmEmailCode(ctx context.Context, email string, action enum.EmailCodeAction) error
+	ConfirmCode(ctx context.Context, email string, code string) (*auth.ConfirmationCode, error)
 }
 
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	userService userService
-	smtpService smtpService
+	userService  userService
+	smtpService  smtpService
+	tokenService tokenService
 }
 
 func NewService(
@@ -38,24 +49,27 @@ func NewService(
 	logger applogger.Logger,
 	userService userService,
 	smtpService smtpService,
+	tokenService tokenService,
 ) *Service {
 	return &Service{
-		tx:          tx,
-		logger:      logger,
-		userService: userService,
-		smtpService: smtpService,
+		tx:           tx,
+		logger:       logger,
+		userService:  userService,
+		smtpService:  smtpService,
+		tokenService: tokenService,
 	}
 }
 
 // todo add check is confirmed email
+// todo add unique user email, username
 
-func (srv *Service) SendConfirmationCode(ctx context.Context, req request.SendCodeRequest) (*dto.SendCodeResponse, error) {
+func (srv *Service) SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*dto.SendCodeResponse, error) {
 	_, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
 	return &dto.SendCodeResponse{NextCodeDelay: codeDelay},
-		srv.smtpService.SendConfirmEmailCode(ctx, req.Email)
+		srv.smtpService.SendConfirmEmailCode(ctx, req.Email, action)
 }
 
 func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCodeRequest) error {
@@ -63,12 +77,36 @@ func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCode
 	if err != nil {
 		return err
 	}
-	err = srv.smtpService.ConfirmCode(ctx, req.Email, req.Code)
+	code, err := srv.smtpService.ConfirmCode(ctx, req.Email, req.Code)
 	if err != nil {
 		return err
 	}
 	t := true
-	return srv.userService.UpdateUser(ctx, u.Id, &userRepository.UserUpdateParams{
-		ConfirmedEmail: &t,
-	})
+	switch code.Action {
+	case enum.ConfirmCode:
+		return srv.userService.UpdateUser(ctx, u.Id, &userRepository.UserUpdateParams{
+			ConfirmedEmail: &t,
+		})
+	case enum.ForgotPassword:
+		if req.NewPassword == "" {
+			return apperrors.NoNewPassword
+		}
+		return srv.userService.UpdateUser(ctx, u.Id, &userRepository.UserUpdateParams{
+			Password: &req.NewPassword,
+		})
+	default:
+		return nil
+	}
+}
+
+func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*token.UserTokens, error) {
+	u, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
+	if err != nil {
+		return nil, err
+	}
+	return srv.tokenService.GenerateUserTokens(ctx, u.Id, u.Role)
+}
+
+func (srv *Service) RefreshTokens(ctx context.Context, req token.UserTokens) (*token.UserTokens, error) {
+	return srv.tokenService.RefreshTokens(ctx, req.Access, req.Refresh)
 }

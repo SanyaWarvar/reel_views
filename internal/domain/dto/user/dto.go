@@ -12,6 +12,7 @@ type User struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	ImgUrl    string    `json:"imgUrl"`
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
@@ -21,6 +22,7 @@ func UserDtoFromEntity(entity *user.User) *User {
 		Username:  entity.Username,
 		Email:     entity.Email,
 		ImgUrl:    entity.Email,
+		Role:      entity.Role,
 		CreatedAt: entity.CreatedAt,
 	}
 }

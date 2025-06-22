@@ -61,7 +61,7 @@ func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintia
 		Password:  generatePasswordHash(credintials.Password),
 		ImgUrl:    "",
 		CreatedAt: user.CreatedAt,
-		RoleId:    constants.RolesToIntMap[constants.ClientRole],
+		Role:      constants.ClientRole,
 	}
 	err := srv.userRepo.CreateUser(ctx, &userEntity)
 	return &user, err
@@ -77,6 +77,11 @@ func (srv *Service) UpdateUser(ctx context.Context, userId uuid.UUID, filter *us
 
 	if !ex {
 		return apperrors.UserNotFound
+	}
+
+	if filter.Password != nil {
+		newPassword := generatePasswordHash(*filter.Password)
+		filter.Password = &newPassword
 	}
 
 	return srv.userRepo.UpdateUser(ctx, userId, filter)

@@ -9,8 +9,19 @@ var (
 	InvalidTokenError          = apperror.NewUnauthorizedError("invalid token", "invalid_token")
 
 	UserNotFound           = apperror.NewInvalidDataError("user not found", "user_not_found")
-	IncorrectPassword      = apperror.NewInvalidDataError("incorrect password", "incorrect_password")
+	IncorrectPassword      = apperror.NewUnauthorizedError("incorrect password", "incorrect_password")
 	ConfirmCodeAlreadySend = apperror.NewInvalidDataError("confirm code already send", "confirm_code_already_send")
 	ConfirmCodeNotExist    = apperror.NewInvalidDataError("confirm code not exist", "confirm_code_not_exist")
 	ConfirmCodeIncorrect   = apperror.NewInvalidDataError("confirm code incorrect", "confirm_code_incorrect")
+
+	TokenClaimsError = apperror.NewInvalidDataError("bad token claims", "bad_token_claims")
+	TokensDontMatch  = apperror.NewInvalidDataError("tokens dont match", "tokens_dont_match")
+	TokenDontExist   = apperror.NewInvalidDataError("token dont exist", "token_dont_exist")
+
+	NoNewPassword = apperror.NewBadRequestError("no new password", "no_new_password")
 )
+
+// коды динамических ошибок:
+// bad_refresh_token
+// invalid_X-Request-Id
+// bad_access_token

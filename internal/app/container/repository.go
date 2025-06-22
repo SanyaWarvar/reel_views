@@ -1,6 +1,9 @@
 package container
 
-import userRepo "rv/internal/infrastructure/repository/user"
+import (
+	tokensRepo "rv/internal/infrastructure/repository/tokens"
+	userRepo "rv/internal/infrastructure/repository/user"
+)
 
 func (c *Container) getRepositories() *repositories {
 	if c.repositories == nil {
@@ -13,6 +16,7 @@ type repositories struct {
 	c *Container
 
 	user *userRepo.Repository
+	token *tokensRepo.Repository
 }
 
 func (r *repositories) getUserRepository() *userRepo.Repository {
@@ -20,4 +24,11 @@ func (r *repositories) getUserRepository() *userRepo.Repository {
 		r.user = userRepo.NewRepository(r.c.getDBPool())
 	}
 	return r.user
+}
+
+func (r *repositories) getTokenRepository() *tokensRepo.Repository {
+	if r.token == nil {
+		r.token = tokensRepo.NewRepository(r.c.getDBPool())
+	}
+	return r.token
 }

@@ -39,6 +39,7 @@ func (s *applications) getAuthApplicationService() *auth.Service {
 
 			s.c.getServices().getUserService(),
 			s.c.getServices().getSMTPService(),
+			s.c.getServices().getTokenService(),
 		)
 	}
 	return s.auth

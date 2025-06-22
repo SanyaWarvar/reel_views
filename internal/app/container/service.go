@@ -1,8 +1,9 @@
 package container
 
 import (
-	smtpSrv "rv/internal/domain/smtp"
-	userSrv "rv/internal/domain/user"
+	smtpSrv "rv/internal/domain/services/smtp"
+	tokenSrv "rv/internal/domain/services/token"
+	userSrv "rv/internal/domain/services/user"
 )
 
 func (c *Container) getServices() *services {
@@ -15,8 +16,9 @@ func (c *Container) getServices() *services {
 type services struct {
 	c *Container
 
-	user *userSrv.Service
-	smtp *smtpSrv.Service
+	user  *userSrv.Service
+	smtp  *smtpSrv.Service
+	token *tokenSrv.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -46,4 +48,17 @@ func (s *services) getSMTPService() *smtpSrv.Service {
 		)
 	}
 	return s.smtp
+}
+
+func (s *services) getTokenService() *tokenSrv.Service {
+	if s.token == nil {
+		s.token = tokenSrv.NewService(
+			s.c.getConfig().Jwt.AccessTTL,
+			s.c.getConfig().Jwt.RefreshTTL,
+			s.c.getConfig().Jwt.JwtSecret,
+			s.c.getRepositories().getTokenRepository(),
+		)
+
+	}
+	return s.token
 }

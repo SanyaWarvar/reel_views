@@ -3,10 +3,10 @@ package smtp
 import (
 	"context"
 	"encoding/json"
+	"rv/internal/domain/dto/auth"
 	"rv/internal/infrastructure/cache/common"
 	"rv/pkg/applogger"
 	"rv/pkg/database/dragonfly"
-	"rv/pkg/util"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -24,37 +24,29 @@ func NewCache(logger applogger.Logger, client *dragonfly.Client) *Cache {
 	}
 }
 
-type ConfirmationCode struct {
-	Code      string    `json:"code"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-func (ch *Cache) SaveConfirmCode(ctx context.Context, email, code string, ttl *time.Duration) error {
-	data, err := json.Marshal(ConfirmationCode{Code: code, CreatedAt: util.GetCurrentUTCTime()})
+func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item auth.ConfirmationCode, ttl *time.Duration) error {
+	data, err := json.Marshal(item)
 	if err != nil {
 		return err
 	}
 	return ch.client.Save(ctx, common.EmailConfirmationCodes, email, data, ttl)
 }
 
-func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (string, time.Duration, bool, error) {
-	var ttl time.Duration
-	var code string
+func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*auth.ConfirmationCode, bool, error) {
 	data, err := ch.client.GetOne(ctx, common.EmailConfirmationCodes, email)
 	if err != nil {
 		switch err {
 		case redis.Nil:
-			return code, ttl, false, nil
+			return nil, false, nil
 
 		}
-		return code, ttl, false, err
+		return nil, false, err
 	}
 
-	var output ConfirmationCode
+	var output auth.ConfirmationCode
 	err = json.Unmarshal(data, &output)
 	if err != nil {
-		return code, ttl, false, err
+		return &output, false, err
 	}
-	return output.Code, time.Now().UTC().Sub(output.CreatedAt), true, nil
-
+	return &output, true, nil
 }
