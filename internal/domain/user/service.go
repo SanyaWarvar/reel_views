@@ -1,0 +1,134 @@
+package auth
+
+import (
+	"context"
+	"crypto/sha512"
+	"fmt"
+	"rv/internal/domain/dto/request"
+	"rv/internal/domain/dto/user"
+	apperrors "rv/internal/errors"
+	userRepository "rv/internal/infrastructure/repository/user"
+
+	"rv/pkg/applogger"
+	"rv/pkg/constants"
+	"rv/pkg/trx"
+	"rv/pkg/util"
+
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+)
+
+// todo вынести в конфиг
+var salt string = "pashatechnik"
+
+type userRepo interface {
+	CreateUser(ctx context.Context, item *userRepository.User) error
+	GetUser(ctx context.Context, filter userRepository.UserFilter) (*userRepository.User, bool, error)
+	UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *userRepository.UserUpdateParams) error
+}
+
+type Service struct {
+	tx     trx.TransactionManager
+	logger applogger.Logger
+
+	userRepo userRepo
+}
+
+func NewService(
+	tx trx.TransactionManager,
+	logger applogger.Logger,
+	userRepo userRepo,
+) *Service {
+	return &Service{
+		tx:       tx,
+		logger:   logger,
+		userRepo: userRepo,
+	}
+}
+
+func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintials request.RegisterCredentials) (*user.User, error) {
+	user := user.User{
+		Id:        util.NewUUID(),
+		Username:  credintials.Username,
+		Email:     credintials.Email,
+		ImgUrl:    "",
+		CreatedAt: util.GetCurrentUTCTime(),
+	}
+	userEntity := userRepository.User{
+		Id:        user.Id,
+		Username:  user.Username,
+		Email:     user.Email,
+		Password:  generatePasswordHash(credintials.Password),
+		ImgUrl:    "",
+		CreatedAt: user.CreatedAt,
+		RoleId:    constants.RolesToIntMap[constants.ClientRole],
+	}
+	err := srv.userRepo.CreateUser(ctx, &userEntity)
+	return &user, err
+}
+
+func (srv *Service) UpdateUser(ctx context.Context, userId uuid.UUID, filter *userRepository.UserUpdateParams) error {
+	_, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+		Id: &userId,
+	})
+	if err != nil {
+		return errors.Wrap(err, "srv.userRepo.GetUser")
+	}
+
+	if !ex {
+		return apperrors.UserNotFound
+	}
+
+	return srv.userRepo.UpdateUser(ctx, userId, filter)
+}
+
+func (srv *Service) GetUserById(ctx context.Context, userId uuid.UUID, password string) (*user.User, error) {
+	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+		Id: &userId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !ex {
+		return nil, apperrors.UserNotFound
+	}
+
+	if password != "" {
+		if !srv.comparePassword(password, targetEntityUser.Password) {
+			return nil, apperrors.IncorrectPassword
+		}
+	}
+	return user.UserDtoFromEntity(targetEntityUser), nil
+}
+
+func (srv *Service) GetUserByEmail(ctx context.Context, email string, password string) (*user.User, error) {
+	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+		Email: &email,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !ex {
+		return nil, apperrors.UserNotFound
+	}
+
+	if password != "" {
+		if !srv.comparePassword(password, targetEntityUser.Password) {
+			return nil, apperrors.IncorrectPassword
+		}
+	}
+	return user.UserDtoFromEntity(targetEntityUser), nil
+}
+
+func (srv *Service) comparePassword(origin, existed string) bool {
+	return generatePasswordHash(origin) == existed
+}
+
+func generatePasswordHash(password string) string {
+	hash := sha512.New()
+	hash.Write([]byte(password))
+
+	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+}

@@ -30,6 +30,7 @@ type Container struct {
 	applications *applications
 	services     *services
 	workers      *workers
+	caches       *cache
 }
 
 func New(cfg *config.Config) *Container {

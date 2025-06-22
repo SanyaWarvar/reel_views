@@ -1,6 +1,9 @@
 package container
 
-import "rv/internal/application/auth"
+import (
+	"rv/internal/application/auth"
+	userApp "rv/internal/application/user"
+)
 
 func (c *Container) getApplication() *applications {
 	if c.applications == nil {
@@ -12,14 +15,30 @@ func (c *Container) getApplication() *applications {
 type applications struct {
 	c *Container
 
+	user *userApp.Service
 	auth *auth.Service
+}
+
+func (s *applications) getUserApplicationService() *userApp.Service {
+	if s.user == nil {
+		s.user = userApp.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+
+			s.c.getServices().getUserService(),
+		)
+	}
+	return s.user
 }
 
 func (s *applications) getAuthApplicationService() *auth.Service {
 	if s.auth == nil {
-		s.auth = auth.NewAuthService(
+		s.auth = auth.NewService(
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
+
+			s.c.getServices().getUserService(),
+			s.c.getServices().getSMTPService(),
 		)
 	}
 	return s.auth

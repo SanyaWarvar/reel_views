@@ -25,7 +25,7 @@ log:
 
 internal:
   path: "/rl"
-  environment: "develop"
+  environment: ".env"
   logInputParamOnErr: true
 
 cache:
@@ -35,3 +35,10 @@ cache:
 
 response:
   exportError: true
+
+email:
+  ownerEmail: "templeapi88@gmail.com"
+  addres: "smtp.gmail.com:587"
+  codeLenght: 6
+  codeExp: "5m"
+  minTTL: "4m"

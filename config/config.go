@@ -2,20 +2,23 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 type (
 	Config struct {
-		Internal     InternalConfig     `yaml:"internal"`
-		Postgres     PostgresConfig     `yaml:"postgres"`
-		Cron         CronConfig         `yaml:"cron"`
-		HTTP         HTTPConfig         `yaml:"http"`
-		Log          LogConfig          `yaml:"log"`
-		Response     ResponseConfig     `yaml:"response"`
-		Cache        CacheConfig        `yaml:"Cache"`
+		Internal InternalConfig  `yaml:"internal"`
+		Postgres PostgresConfig  `yaml:"postgres"`
+		Cron     CronConfig      `yaml:"cron"`
+		HTTP     HTTPConfig      `yaml:"http"`
+		Log      LogConfig       `yaml:"log"`
+		Response ResponseConfig  `yaml:"response"`
+		Cache    CacheConfig     `yaml:"Cache"`
+		Email    EmailSmtpConfig `yaml:"email"`
 	}
 
 	InternalConfig struct {
@@ -66,10 +69,25 @@ type (
 		WriteTimeout       time.Duration `yaml:"writeTimeout" env:"HTTP_WRITE_TIMEOUT"`
 		MaxHeaderMegabytes int           `yaml:"maxHeaderBytes"`
 	}
+
+	EmailSmtpConfig struct {
+		OwnerEmail    string        `yaml:"ownerEmail"`
+		OwnerPassword string        `env:"EMAIL_SMTP_PASSWORD"`
+		Address       string        `yaml:"addres"`
+		CodeLenght    int           `yaml:"codeLenght"`
+		CodeExp       time.Duration `yaml:"codeExp"`
+		MinTTL        time.Duration `yaml:"minTTL"`
+	}
 )
 
 func NewConfig(configDir string) (*Config, error) {
 	cfg := &Config{}
+
+	if _, err := os.Stat(".env"); err == nil {
+		if err := godotenv.Load(".env"); err != nil {
+			return nil, fmt.Errorf("failed to load .env file: %w", err)
+		}
+	}
 
 	err := cleanenv.ReadConfig(configDir, cfg)
 	if err != nil {

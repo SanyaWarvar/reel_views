@@ -10,7 +10,12 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 		c.httpDispatcher = v1.NewDispatcher(
 			c.getConfig().Internal.Path,
 
-			auth.NewController(c.getLogger(), c.getApplication().getAuthApplicationService(), c.getResponseBuilder()),
+			auth.NewController(
+				c.getLogger(),
+				c.getResponseBuilder(),
+				c.getApplication().getUserApplicationService(),
+				c.getApplication().getAuthApplicationService(),
+			),
 		)
 	}
 	return c.httpDispatcher

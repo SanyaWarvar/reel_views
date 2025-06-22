@@ -1,0 +1,26 @@
+package user
+
+import (
+	"rv/internal/infrastructure/repository/user"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type User struct {
+	Id        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	ImgUrl    string    `json:"imgUrl"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func UserDtoFromEntity(entity *user.User) *User {
+	return &User{
+		Id:        entity.Id,
+		Username:  entity.Username,
+		Email:     entity.Email,
+		ImgUrl:    entity.Email,
+		CreatedAt: entity.CreatedAt,
+	}
+}

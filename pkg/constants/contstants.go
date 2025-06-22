@@ -9,10 +9,14 @@ const (
 
 // Roles
 const (
-	ClientRole  = "CLIENT"
-	AdminRole   = "ADMIN"
-	SupportRole = "SUPPORT"
+	ClientRole = "CLIENT"
+	AdminRole  = "ADMIN"
 )
+
+var RolesToIntMap = map[string]int{
+	ClientRole: 1,
+	AdminRole:  2,
+}
 
 // Context
 const (
