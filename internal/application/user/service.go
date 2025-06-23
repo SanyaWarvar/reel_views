@@ -17,6 +17,7 @@ import (
 type userService interface {
 	CreateUserFromAuthCredentials(ctx context.Context, credintials request.RegisterCredentials) (*userDto.User, error)
 	UpdateUser(ctx context.Context, userId uuid.UUID, filter *user.UserUpdateParams) error
+	GetUserById(ctx context.Context, userId uuid.UUID, password string) (*userDto.User, error)
 }
 
 type fileService interface {
@@ -68,4 +69,13 @@ func (srv *Service) ChangeProfilePicture(ctx context.Context, req request.Change
 	return &respDto.ChangePictureResponse{
 		NewImgurl: host + "/statics/images/" + filename,
 	}, err
+}
+
+func (srv *Service) GetUserById(ctx context.Context, userId uuid.UUID, host string) (*userDto.User, error) {
+	u, err := srv.userService.GetUserById(ctx, userId, "")
+	if err != nil {
+		return nil, err
+	}
+	u.ImgUrl = host + "/statics/images/" + u.ImgUrl
+	return u, nil
 }

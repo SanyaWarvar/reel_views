@@ -33,7 +33,7 @@ func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc
 		d.auth.Init(api)
 		authorizedGroup := api.Group("", authorization)
 		{
-			d.user.Init(authorizedGroup)
+			d.user.Init(api, authorizedGroup)
 		}
 	}
 }

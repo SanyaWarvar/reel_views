@@ -31,4 +31,5 @@ const (
 // Errors
 const (
 	BindBodyError string = "bind_body"
+	BindPathError string = "bind_path"
 )

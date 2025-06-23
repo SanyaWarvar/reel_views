@@ -4,6 +4,7 @@ import (
 	"context"
 	"rv/internal/domain/dto/request"
 	resp "rv/internal/domain/dto/response"
+	"rv/internal/domain/dto/user"
 	apperrors "rv/internal/errors"
 	"rv/pkg/apperror"
 	"rv/pkg/applogger"
@@ -12,10 +13,12 @@ import (
 	"rv/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type userService interface {
 	ChangeProfilePicture(ctx context.Context, req request.ChangeProfilePicture, host string) (*resp.ChangePictureResponse, error)
+	GetUserById(ctx context.Context, userId uuid.UUID, host string) (*user.User, error)
 }
 
 type Controller struct {
@@ -34,10 +37,12 @@ func NewController(logger applogger.Logger, builder *response.Builder, userServi
 	}
 }
 
-func (h *Controller) Init(api *gin.RouterGroup) {
+func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 	user := api.Group("/user")
+	userAuth := authApi.Group("/user")
 	{
-		user.POST("/picture", h.changeProfilePicture)
+		userAuth.POST("/picture", h.changeProfilePicture)
+		user.GET("/profile/:id", h.getUserById)
 	}
 }
 
@@ -74,4 +79,31 @@ func (h *Controller) changeProfilePicture(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, picUrl))
+}
+
+// @Summary get_user_by_id
+// @Description получить юзера по айди
+// @Tags user
+// @Produce json
+// @Param path id string true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
+// @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found"
+// @Router /rl/api/v1/user/profile/{id} [post]
+func (h *Controller) getUserById(c *gin.Context) {
+	ctx := c.Request.Context()
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	user, err := h.userService.GetUserById(ctx, id, c.Request.Host)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, user))
 }

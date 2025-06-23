@@ -21,7 +21,7 @@ func UserDtoFromEntity(entity *user.User) *User {
 		Id:        entity.Id,
 		Username:  entity.Username,
 		Email:     entity.Email,
-		ImgUrl:    entity.Email,
+		ImgUrl:    entity.ImgUrl,
 		Role:      entity.Role,
 		CreatedAt: entity.CreatedAt,
 	}

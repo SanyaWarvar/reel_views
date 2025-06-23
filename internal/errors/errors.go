@@ -26,3 +26,4 @@ var (
 // bad_refresh_token 422
 // invalid_X-Request-Id 400
 // bad_access_token 422
+// bind_path 400
