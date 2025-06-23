@@ -95,7 +95,9 @@ func LoggerHandler(logger applogger.Logger, logInputParamOnErr bool) gin.Handler
 		if len(c.Errors) > 0 {
 
 			logger.WithCtx(c.Request.Context()).Errorf(c.Errors.Last().Error())
-
+			if len(string(requestBody)) > 2000 {
+				return
+			}
 			if logInputParamOnErr {
 				msg := fmt.Sprintf("ERR: %s, IP: %s, AGENT: %s, METHOD: %s, STATUS: %d, QUERY_PARAM: %s, HEADERS: %v, REQUEST_BODY: %v",
 					c.Errors.Last().Err.Error(), clientIP, userAgent, method, c.Writer.Status(), c.Request.URL.RawQuery, util.MaskHeaders(headers), string(requestBody))

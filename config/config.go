@@ -67,6 +67,7 @@ type (
 	}
 
 	CronConfig struct {
+		GenerateStatics string `yaml:"generateStatics"`
 	}
 
 	HTTPConfig struct {

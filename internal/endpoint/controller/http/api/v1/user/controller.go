@@ -1,0 +1,77 @@
+package user
+
+import (
+	"context"
+	"rv/internal/domain/dto/request"
+	resp "rv/internal/domain/dto/response"
+	apperrors "rv/internal/errors"
+	"rv/pkg/apperror"
+	"rv/pkg/applogger"
+	"rv/pkg/constants"
+	"rv/pkg/response"
+	"rv/pkg/util"
+
+	"github.com/gin-gonic/gin"
+)
+
+type userService interface {
+	ChangeProfilePicture(ctx context.Context, req request.ChangeProfilePicture, host string) (*resp.ChangePictureResponse, error)
+}
+
+type Controller struct {
+	lgr     applogger.Logger
+	builder *response.Builder
+
+	userService userService
+}
+
+func NewController(logger applogger.Logger, builder *response.Builder, userService userService) *Controller {
+	return &Controller{
+		lgr:     logger,
+		builder: builder,
+
+		userService: userService,
+	}
+}
+
+func (h *Controller) Init(api *gin.RouterGroup) {
+	user := api.Group("/user")
+	{
+		user.POST("/picture", h.changeProfilePicture)
+	}
+}
+
+// @Summary change_profile_picture
+// @Description сменить аватарку пользователя
+// @Tags user
+// @Produce json
+// @Param data body request.ChangeProfilePicture true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found"
+// @Router /rl/api/v1/user/register [post]
+func (h *Controller) changeProfilePicture(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.ChangeProfilePicture
+	err := c.ShouldBind(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+	req.UserId = userId
+	picUrl, err := h.userService.ChangeProfilePicture(ctx, req, c.Request.Host)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, picUrl))
+}

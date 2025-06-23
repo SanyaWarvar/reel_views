@@ -26,6 +26,7 @@ func (s *applications) getUserApplicationService() *userApp.Service {
 			s.c.getLogger(),
 
 			s.c.getServices().getUserService(),
+			s.c.getServices().getFileService(),
 		)
 	}
 	return s.user

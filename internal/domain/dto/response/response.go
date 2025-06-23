@@ -13,3 +13,7 @@ type RegisterResponse struct {
 type SendCodeResponse struct {
 	NextCodeDelay time.Duration `json:"nextCodeDelay"`
 }
+
+type ChangePictureResponse struct {
+	NewImgurl string `json:"newImgUrl"`
+}

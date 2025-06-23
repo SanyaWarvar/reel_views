@@ -1,12 +1,16 @@
 package container
 
 import (
+	"fmt"
+	"rv/internal/endpoint/worker/file"
 	"rv/pkg/cron"
 )
 
 type workers struct {
 	c  *Container
 	cr *cron.Cron
+
+	file *file.Cron
 }
 
 func (c *Container) getWorkers() *workers {
@@ -19,20 +23,17 @@ func (c *Container) getWorkers() *workers {
 	return c.workers
 }
 
-/*
-func (w *workers) getMatchJob() *match.Cron {
-	if w.match == nil {
-		w.match = match.NewCron(w.c.getLogger(), w.c.getApplication().getMatchApplicationService())
+func (w *workers) getFileJob() *file.Cron {
+	if w.file == nil {
+		w.file = file.NewCron(w.c.getLogger(), w.c.getServices().getFileService())
 	}
-	return w.match
-}*/
-
+	return w.file
+}
 
 func (w *workers) start() error {
-	/*if err := w.cr.AddFunc(w.c.getConfig().Cron.DeclineStuckMatches, w.getMatchJob().DeclineStuckMatches); err != nil {
-		return fmt.Errorf("DeclineStuckMatches: %v", err)
+	if err := w.cr.AddFunc(w.c.getConfig().Cron.GenerateStatics, w.getFileJob().GenerateStatics); err != nil {
+		return fmt.Errorf("GenerateStatics: %v", err)
 	}
-*/
 	w.cr.Start()
 	return nil
 }
@@ -40,4 +41,3 @@ func (w *workers) start() error {
 func (w *workers) stop() {
 	w.cr.Stop()
 }
-

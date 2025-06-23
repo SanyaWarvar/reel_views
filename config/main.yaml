@@ -46,3 +46,6 @@ email:
 jwt:
   accessTtl: "100h"
   refreshTtl: "100h"
+
+cron:
+  generateStatics: "@every 5s"

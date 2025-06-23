@@ -43,7 +43,7 @@ func (k *Kernel) Init() *gin.Engine {
 
 	router.StaticFile("/swagger.json", "./docs/swagger.json")
 	router.StaticFile("/swagger.yaml", "./docs/swagger.yaml")
-
+	router.Static("/statics/images", "./statics/images")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerFiles.Handler,
 		ginSwagger.URL("/swagger.json"),
@@ -65,5 +65,5 @@ func (k *Kernel) Init() *gin.Engine {
 }
 
 func (k *Kernel) initApi(router *gin.RouterGroup) {
-	k.dispatcher.Init(router.Group("api"))
+	k.dispatcher.Init(router.Group("api"), AuthorizationHandler())
 }

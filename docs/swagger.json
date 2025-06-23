@@ -372,9 +372,106 @@
                     }
                 }
             }
+        },
+        "/rl/api/v1/user/register": {
+            "post": {
+                "description": "сменить аватарку пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "change_profile_picture",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ChangePictureResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: user_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "multipart.FileHeader": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "header": {
+                    "$ref": "#/definitions/textproto.MIMEHeader"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "rv_internal_domain_dto_request.ChangeProfilePicture": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "rv_internal_domain_dto_request.ConfimationCodeRequest": {
             "type": "object",
             "required": [
@@ -422,6 +519,14 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "rv_internal_domain_dto_response.ChangePictureResponse": {
+            "type": "object",
+            "properties": {
+                "newImgUrl": {
                     "type": "string"
                 }
             }
@@ -497,6 +602,15 @@
                 },
                 "perPage": {
                     "type": "integer"
+                }
+            }
+        },
+        "textproto.MIMEHeader": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
                 }
             }
         },

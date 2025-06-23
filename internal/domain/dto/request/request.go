@@ -1,5 +1,11 @@
 package request
 
+import (
+	"mime/multipart"
+
+	"github.com/google/uuid"
+)
+
 // RegisterCredentials
 // @Schema
 type RegisterCredentials struct {
@@ -27,4 +33,11 @@ type ConfimationCodeRequest struct {
 // @Schema
 type ForgotPasswordRequest struct {
 	Email string `json:"email" binding:"required"`
+}
+
+// ChangeProfilePicture
+// @Schema
+type ChangeProfilePicture struct {
+	File   *multipart.FileHeader `form:"file" binding:"required"`
+	UserId uuid.UUID
 }

@@ -1,4 +1,22 @@
 definitions:
+  multipart.FileHeader:
+    properties:
+      filename:
+        type: string
+      header:
+        $ref: '#/definitions/textproto.MIMEHeader'
+      size:
+        type: integer
+    type: object
+  rv_internal_domain_dto_request.ChangeProfilePicture:
+    properties:
+      file:
+        $ref: '#/definitions/multipart.FileHeader'
+      userId:
+        type: string
+    required:
+    - file
+    type: object
   rv_internal_domain_dto_request.ConfimationCodeRequest:
     properties:
       code:
@@ -32,6 +50,11 @@ definitions:
     - email
     - password
     - username
+    type: object
+  rv_internal_domain_dto_response.ChangePictureResponse:
+    properties:
+      newImgUrl:
+        type: string
     type: object
   rv_internal_domain_dto_response.RegisterResponse:
     properties:
@@ -80,6 +103,12 @@ definitions:
         type: integer
       perPage:
         type: integer
+    type: object
+  textproto.MIMEHeader:
+    additionalProperties:
+      items:
+        type: string
+      type: array
     type: object
   time.Duration:
     enum:
@@ -337,4 +366,47 @@ paths:
       summary: register_user
       tags:
       - auth
+  /rl/api/v1/user/register:
+    post:
+      description: сменить аватарку пользователя
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.ChangePictureResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: change_profile_picture
+      tags:
+      - user
 swagger: "2.0"
