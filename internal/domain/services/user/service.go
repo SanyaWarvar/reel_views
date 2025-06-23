@@ -51,7 +51,7 @@ func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintia
 		Id:        util.NewUUID(),
 		Username:  credintials.Username,
 		Email:     credintials.Email,
-		ImgUrl:    "",
+		ImgUrl:    "base.png",
 		CreatedAt: util.GetCurrentUTCTime(),
 	}
 	userEntity := userRepository.User{
@@ -59,7 +59,7 @@ func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintia
 		Username:  user.Username,
 		Email:     user.Email,
 		Password:  generatePasswordHash(credintials.Password),
-		ImgUrl:    "",
+		ImgUrl:    "base.png",
 		CreatedAt: user.CreatedAt,
 		Role:      constants.ClientRole,
 	}
