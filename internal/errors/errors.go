@@ -23,6 +23,6 @@ var (
 )
 
 // коды динамических ошибок:
-// bad_refresh_token
-// invalid_X-Request-Id
-// bad_access_token
+// bad_refresh_token 422
+// invalid_X-Request-Id 400
+// bad_access_token 422

@@ -62,8 +62,8 @@ func (h *Controller) Init(api *gin.RouterGroup) {
 // @Param data body request.RegisterCredentials true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=resp.RegisterResponse}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: not_unique"
 // @Router /rl/api/v1/auth/register [post]
 func (h *Controller) register(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -89,8 +89,9 @@ func (h *Controller) register(c *gin.Context) {
 // @Param data body request.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=resp.SendCodeResponse}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: incorrect_password"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found, confirm_code_already_send"
 // @Router /rl/api/v1/auth/code [post]
 func (h *Controller) sendCode(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -120,8 +121,8 @@ func (h *Controller) sendCode(c *gin.Context) {
 // @Param data body request.ConfimationCodeRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found, confirm_code_incorrect, confirm_code_not_exist, no_new_password"
 // @Router /rl/api/v1/auth/confirm [post]
 func (h *Controller) confirmCode(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -147,9 +148,9 @@ func (h *Controller) confirmCode(c *gin.Context) {
 // @Param data body request.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=token.UserTokens}
-// @Failure 400 {object} response.Response{}
-// @Failure 401 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 401 {object} response.Response{} "possible codes: incorrect_password"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found "
 // @Router /rl/api/v1/auth/login [post]
 func (h *Controller) login(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -175,8 +176,8 @@ func (h *Controller) login(c *gin.Context) {
 // @Param data body token.UserTokens true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=token.UserTokens}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: bad_refresh_token, bad_access_token, bad_token_claims, token_dont_exist, tokens_dont_match"
 // @Router /rl/api/v1/auth/refresh [post]
 func (h *Controller) refreshTokens(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -202,8 +203,8 @@ func (h *Controller) refreshTokens(c *gin.Context) {
 // @Param data body request.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=resp.SendCodeResponse}
-// @Failure 400 {object} response.Response{}
-// @Failure 422 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: user_not_found, confirm_code_already_send"
 // @Router /rl/api/v1/auth/forgot [post]
 func (h *Controller) forgotPassword(c *gin.Context) {
 	ctx := c.Request.Context()

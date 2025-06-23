@@ -63,13 +63,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: incorrect_password",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: user_not_found, confirm_code_already_send",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -113,13 +113,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: user_not_found, confirm_code_incorrect, confirm_code_not_exist, no_new_password",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -175,13 +175,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: user_not_found, confirm_code_already_send",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -237,19 +237,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "possible codes: incorrect_password",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: user_not_found ",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -305,13 +305,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: bad_refresh_token, bad_access_token, bad_token_claims, token_dont_exist, tokens_dont_match",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -367,13 +367,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
+                        "description": "possible codes: not_unique",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
