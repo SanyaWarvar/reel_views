@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"rv/internal/domain/dto/auth"
-	"rv/internal/infrastructure/cache/common"
 	"rv/pkg/applogger"
 	"rv/pkg/database/dragonfly"
 	"time"
@@ -29,11 +28,11 @@ func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item auth.Co
 	if err != nil {
 		return err
 	}
-	return ch.client.Save(ctx, common.EmailConfirmationCodes, email, data, ttl)
+	return ch.client.SaveValue(ctx, email, data, *ttl)
 }
 
 func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*auth.ConfirmationCode, bool, error) {
-	data, err := ch.client.GetOne(ctx, common.EmailConfirmationCodes, email)
+	data, err := ch.client.GetValue(ctx, email)
 	if err != nil {
 		switch err {
 		case redis.Nil:
