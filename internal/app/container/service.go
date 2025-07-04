@@ -2,6 +2,7 @@ package container
 
 import (
 	"rv/internal/domain/services/file"
+	moviesSrv "rv/internal/domain/services/movies"
 	smtpSrv "rv/internal/domain/services/smtp"
 	tokenSrv "rv/internal/domain/services/token"
 	userSrv "rv/internal/domain/services/user"
@@ -21,6 +22,7 @@ type services struct {
 	smtp  *smtpSrv.Service
 	token *tokenSrv.Service
 	file  *file.Service
+	movie *moviesSrv.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -74,4 +76,15 @@ func (s *services) getFileService() *file.Service {
 
 	}
 	return s.file
+}
+
+func (s *services) getMoviesService() *moviesSrv.Service {
+	if s.movie == nil {
+		s.movie = moviesSrv.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+			s.c.getRepositories().getMoviesRepository(),
+		)
+	}
+	return s.movie
 }

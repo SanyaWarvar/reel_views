@@ -3,6 +3,7 @@ package container
 import (
 	v1 "rv/internal/endpoint/controller/http/api/v1"
 	"rv/internal/endpoint/controller/http/api/v1/auth"
+	"rv/internal/endpoint/controller/http/api/v1/movies"
 	"rv/internal/endpoint/controller/http/api/v1/user"
 )
 
@@ -22,6 +23,12 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 				c.getLogger(),
 				c.getResponseBuilder(),
 				c.getApplication().getUserApplicationService(),
+			),
+
+			movies.NewController(
+				c.getLogger(),
+				c.getResponseBuilder(),
+				c.getApplication().getMoviesApplicationService(),
 			),
 		)
 	}

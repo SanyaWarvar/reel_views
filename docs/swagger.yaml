@@ -8,6 +8,21 @@ definitions:
       size:
         type: integer
     type: object
+  rv_internal_domain_dto_movies.MoviesShort:
+    properties:
+      avgRating:
+        type: number
+      genres:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      imgUrl:
+        type: string
+      title:
+        type: string
+    type: object
   rv_internal_domain_dto_request.ChangeProfilePicture:
     properties:
       file:
@@ -55,6 +70,13 @@ definitions:
     properties:
       newImgUrl:
         type: string
+    type: object
+  rv_internal_domain_dto_response.GetMoviesShortResponse:
+    properties:
+      movies:
+        items:
+          $ref: '#/definitions/rv_internal_domain_dto_movies.MoviesShort'
+        type: array
     type: object
   rv_internal_domain_dto_response.RegisterResponse:
     properties:
@@ -366,7 +388,41 @@ paths:
       summary: register_user
       tags:
       - auth
-  /rl/api/v1/user/register:
+  /rl/api/v1/movies/short/{page}:
+    get:
+      description: получить короткие записи о фильмах
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.GetMoviesShortResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_movies_short
+      tags:
+      - user
+  /rl/api/v1/user/picture:
     post:
       description: сменить аватарку пользователя
       parameters:
@@ -407,6 +463,43 @@ paths:
           schema:
             $ref: '#/definitions/rv_pkg_response.Response'
       summary: change_profile_picture
+      tags:
+      - user
+  /rl/api/v1/user/profile/{id}:
+    post:
+      description: получить юзера по айди
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.ChangePictureResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_user_by_id
       tags:
       - user
 swagger: "2.0"

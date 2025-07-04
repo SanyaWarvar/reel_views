@@ -41,3 +41,7 @@ type ChangeProfilePicture struct {
 	File   *multipart.FileHeader `form:"file" binding:"required"`
 	UserId uuid.UUID
 }
+
+type GetMoviesShortRequest struct {
+	Page uint64 `json:"page"`
+}

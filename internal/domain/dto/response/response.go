@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"rv/internal/domain/dto/movies"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,4 +17,8 @@ type SendCodeResponse struct {
 
 type ChangePictureResponse struct {
 	NewImgurl string `json:"newImgUrl"`
+}
+
+type GetMoviesShortResponse struct {
+	Movies []movies.MoviesShort `json:"movies"`
 }
