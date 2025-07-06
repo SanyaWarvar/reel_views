@@ -2,6 +2,8 @@ package container
 
 import (
 	"rv/internal/domain/services/file"
+	moviesSrv "rv/internal/domain/services/movies"
+	"rv/internal/domain/services/reviews"
 	smtpSrv "rv/internal/domain/services/smtp"
 	tokenSrv "rv/internal/domain/services/token"
 	userSrv "rv/internal/domain/services/user"
@@ -17,10 +19,12 @@ func (c *Container) getServices() *services {
 type services struct {
 	c *Container
 
-	user  *userSrv.Service
-	smtp  *smtpSrv.Service
-	token *tokenSrv.Service
-	file  *file.Service
+	user   *userSrv.Service
+	smtp   *smtpSrv.Service
+	token  *tokenSrv.Service
+	file   *file.Service
+	movie  *moviesSrv.Service
+	review *reviews.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -74,4 +78,27 @@ func (s *services) getFileService() *file.Service {
 
 	}
 	return s.file
+}
+
+func (s *services) getMoviesService() *moviesSrv.Service {
+	if s.movie == nil {
+		s.movie = moviesSrv.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+			s.c.getRepositories().getMoviesRepository(),
+			s.c.getRepositories().getReviewsRepository(),
+		)
+	}
+	return s.movie
+}
+
+func (s *services) getReviewsService() *reviews.Service {
+	if s.review == nil {
+		s.review = reviews.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+			s.c.getRepositories().getReviewsRepository(),
+		)
+	}
+	return s.review
 }

@@ -381,7 +381,63 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/user/register": {
+        "/rl/api/v1/movies/short/{page}": {
+            "get": {
+                "description": "получить короткие записи о фильмах",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get_movies_short",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.GetMoviesShortResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/user/picture": {
             "post": {
                 "description": "сменить аватарку пользователя",
                 "produces": [
@@ -449,6 +505,66 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/rl/api/v1/user/profile/{id}": {
+            "post": {
+                "description": "получить юзера по айди",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get_user_by_id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ChangePictureResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: user_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -463,6 +579,29 @@ const docTemplate = `{
                 },
                 "size": {
                     "type": "integer"
+                }
+            }
+        },
+        "rv_internal_domain_dto_movies.MoviesShort": {
+            "type": "object",
+            "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imgUrl": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -536,6 +675,17 @@ const docTemplate = `{
             "properties": {
                 "newImgUrl": {
                     "type": "string"
+                }
+            }
+        },
+        "rv_internal_domain_dto_response.GetMoviesShortResponse": {
+            "type": "object",
+            "properties": {
+                "movies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rv_internal_domain_dto_movies.MoviesShort"
+                    }
                 }
             }
         },
