@@ -70,7 +70,7 @@ func (srv *Service) EditReview(ctx context.Context, req request.EditReviewReques
 	return srv.reviewSrv.UpdateReview(ctx, *review)
 }
 
-func (srv *Service) DeleteReview(ctx context.Context, req request.DeliteReviewRequest, userId uuid.UUID) error {
+func (srv *Service) DeleteReview(ctx context.Context, req request.DeleteReviewRequest, userId uuid.UUID) error {
 	review, err := srv.reviewSrv.GetReviewByID(ctx, req.Id)
 	if err != nil {
 		return apperrors.ReviewNotFound
@@ -82,12 +82,12 @@ func (srv *Service) DeleteReview(ctx context.Context, req request.DeliteReviewRe
 	return srv.reviewSrv.DeleteReview(ctx, req.Id)
 }
 
-func (srv *Service) GetUserReviews(ctx context.Context, userId uuid.UUID, page uint64) (*resp.ReviewListReponse, error) {
+func (srv *Service) GetUserReviews(ctx context.Context, userId uuid.UUID, page uint64) (*resp.ReviewListResponse, error) {
 	reviews, err := srv.reviewSrv.GetReviewsByUser(ctx, userId, page)
-	return &resp.ReviewListReponse{Reviews: reviews}, err
+	return &resp.ReviewListResponse{Reviews: reviews}, err
 }
 
-func (srv *Service) GetMovieReviews(ctx context.Context, movieId uuid.UUID, page uint64) (*resp.ReviewListReponse, error) {
+func (srv *Service) GetMovieReviews(ctx context.Context, movieId uuid.UUID, page uint64) (*resp.ReviewListResponse, error) {
 	reviews, err := srv.reviewSrv.GetReviewsByMovie(ctx, movieId, page)
-	return &resp.ReviewListReponse{Reviews: reviews}, err
+	return &resp.ReviewListResponse{Reviews: reviews}, err
 }

@@ -24,6 +24,8 @@ type GetMoviesShortResponse struct {
 	Movies []movies.MoviesShort `json:"movies"`
 }
 
+// GetMovieFullResponse
+// @Schema
 type GetMovieFullResponse struct {
 	Movie movies.MoviesFull `json:"movie"`
 }
@@ -32,6 +34,8 @@ type NewReviewResponse struct {
 	ReviewId uuid.UUID `json:"reviewId"`
 }
 
-type ReviewListReponse struct {
+// ReviewListResponse
+// @Schema
+type ReviewListResponse struct {
 	Reviews []reviews.Review `json:"reviews"`
 }

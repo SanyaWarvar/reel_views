@@ -87,9 +87,9 @@ func (h *Controller) getMoviesShort(c *gin.Context) {
 // @Description получить полную информацию о фильме
 // @Tags movies
 // @Produce json
-// @Param id path strign true "id"
+// @Param id path string true "id"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.GetMoviesFullResponse}
+// @Success 200 {object} response.Response{data=resp.GetMovieFullResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
 // @Router /rl/api/v1/movies/short/{id} [get]
 func (h *Controller) getMovie(c *gin.Context) {

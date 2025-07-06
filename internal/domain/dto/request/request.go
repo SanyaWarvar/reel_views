@@ -70,9 +70,9 @@ type EditReviewRequest struct {
 	Rating      int       `json:"rating"`
 }
 
-// DeliteReviewRequest
+// DeleteReviewRequest
 // @Schema
-type DeliteReviewRequest struct {
+type DeleteReviewRequest struct {
 	Id uuid.UUID `json:"id" binding:"required"`
 }
 

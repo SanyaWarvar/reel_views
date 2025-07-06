@@ -381,6 +381,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/rl/api/v1/movies/short/{id}": {
+            "get": {
+                "description": "получить полную информацию о фильме",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "get_movie_full",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.GetMovieFullResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/rl/api/v1/movies/short/{page}": {
             "get": {
                 "description": "получить короткие записи о фильмах",
@@ -388,18 +442,22 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "movies"
                 ],
                 "summary": "get_movies_short",
                 "parameters": [
                     {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture"
-                        }
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
                     },
                     {
                         "type": "string",
@@ -429,7 +487,316 @@ const docTemplate = `{
                         }
                     },
                     "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id, zero_page",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/reviews/movie/{page}": {
+            "get": {
+                "description": "Получить рецензии фильма",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "get_movie_reviews",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "movie_id",
+                        "name": "movie_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ReviewListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
                         "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/reviews/my": {
+            "put": {
+                "description": "Отредактировать рецензию",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "edit_review",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rv_internal_domain_dto_request.EditReviewRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: not_unique, not_my_review",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удалить рецензию",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "delete_review",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rv_internal_domain_dto_request.DeleteReviewRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: not_unique, not_my_review",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/reviews/my/new": {
+            "post": {
+                "description": "Добавить новую рецензию",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "new_review",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rv_internal_domain_dto_request.NewReviewRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.NewReviewResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: not_unique",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/reviews/user/{page}": {
+            "get": {
+                "description": "Получить рецензии, оставленные пользователем",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "get_user_reviews",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ReviewListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: not_unique, not_my_review",
                         "schema": {
                             "$ref": "#/definitions/rv_pkg_response.Response"
                         }
@@ -582,6 +949,35 @@ const docTemplate = `{
                 }
             }
         },
+        "rv_internal_domain_dto_movies.MoviesFull": {
+            "type": "object",
+            "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imgUrl": {
+                    "type": "string"
+                },
+                "reviews": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rv_internal_domain_dto_reviews.Review"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "rv_internal_domain_dto_movies.MoviesShort": {
             "type": "object",
             "properties": {
@@ -637,6 +1033,34 @@ const docTemplate = `{
                 }
             }
         },
+        "rv_internal_domain_dto_request.DeleteReviewRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "rv_internal_domain_dto_request.EditReviewRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                }
+            }
+        },
         "rv_internal_domain_dto_request.LoginRequest": {
             "type": "object",
             "required": [
@@ -648,6 +1072,17 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "rv_internal_domain_dto_request.NewReviewRequest": {
+            "type": "object",
+            "required": [
+                "review"
+            ],
+            "properties": {
+                "review": {
+                    "$ref": "#/definitions/rv_internal_domain_dto_reviews.Review"
                 }
             }
         },
@@ -678,6 +1113,14 @@ const docTemplate = `{
                 }
             }
         },
+        "rv_internal_domain_dto_response.GetMovieFullResponse": {
+            "type": "object",
+            "properties": {
+                "movie": {
+                    "$ref": "#/definitions/rv_internal_domain_dto_movies.MoviesFull"
+                }
+            }
+        },
         "rv_internal_domain_dto_response.GetMoviesShortResponse": {
             "type": "object",
             "properties": {
@@ -689,6 +1132,14 @@ const docTemplate = `{
                 }
             }
         },
+        "rv_internal_domain_dto_response.NewReviewResponse": {
+            "type": "object",
+            "properties": {
+                "reviewId": {
+                    "type": "string"
+                }
+            }
+        },
         "rv_internal_domain_dto_response.RegisterResponse": {
             "type": "object",
             "properties": {
@@ -697,11 +1148,50 @@ const docTemplate = `{
                 }
             }
         },
+        "rv_internal_domain_dto_response.ReviewListResponse": {
+            "type": "object",
+            "properties": {
+                "reviews": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rv_internal_domain_dto_reviews.Review"
+                    }
+                }
+            }
+        },
         "rv_internal_domain_dto_response.SendCodeResponse": {
             "type": "object",
             "properties": {
                 "nextCodeDelay": {
                     "$ref": "#/definitions/time.Duration"
+                }
+            }
+        },
+        "rv_internal_domain_dto_reviews.Review": {
+            "type": "object",
+            "required": [
+                "description",
+                "movieId",
+                "rating"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "movieId": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },

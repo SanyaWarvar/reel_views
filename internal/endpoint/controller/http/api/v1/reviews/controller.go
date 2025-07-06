@@ -19,9 +19,9 @@ import (
 type reviewService interface {
 	NewReview(ctx context.Context, req request.NewReviewRequest, userId uuid.UUID) (resp.NewReviewResponse, error)
 	EditReview(ctx context.Context, req request.EditReviewRequest, userId uuid.UUID) error
-	DeleteReview(ctx context.Context, req request.DeliteReviewRequest, userId uuid.UUID) error
-	GetUserReviews(ctx context.Context, userId uuid.UUID, page uint64) (*resp.ReviewListReponse, error)
-	GetMovieReviews(ctx context.Context, movieId uuid.UUID, page uint64) (*resp.ReviewListReponse, error)
+	DeleteReview(ctx context.Context, req request.DeleteReviewRequest, userId uuid.UUID) error
+	GetUserReviews(ctx context.Context, userId uuid.UUID, page uint64) (*resp.ReviewListResponse, error)
+	GetMovieReviews(ctx context.Context, movieId uuid.UUID, page uint64) (*resp.ReviewListResponse, error)
 }
 
 type Controller struct {
@@ -136,7 +136,7 @@ func (h *Controller) editReview(c *gin.Context) {
 // @Router /rl/api/v1/reviews/my [delete]
 func (h *Controller) deleteReview(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.DeliteReviewRequest
+	var req request.DeleteReviewRequest
 	userId, err := util.GetUserId(ctx)
 	if err != nil {
 		_ = c.Error(apperrors.InvalidAuthorizationHeader)
@@ -157,14 +157,14 @@ func (h *Controller) deleteReview(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
 }
 
-// @Summary get_user_review
+// @Summary get_user_reviews
 // @Description Получить рецензии, оставленные пользователем
 // @Tags reviews
 // @Produce json
 // @Param page path int true "page"
 // @Param user_id query string true "user_id"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=resp.ReviewListResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: not_unique, not_my_review"
 // @Router /rl/api/v1/reviews/user/{page} [get]
@@ -195,17 +195,16 @@ func (h *Controller) getUserReviews(c *gin.Context) {
 	c.AbortWithStatusJSON(200, h.builder.BuildSuccessPaginationResponse(ctx, int(page), constants.PaginationSize, 10, resp))
 }
 
-// @Summary get_user_review
-// @Description Получить рецензии, оставленные пользователем
+// @Summary get_movie_reviews
+// @Description Получить рецензии фильма
 // @Tags reviews
 // @Produce json
 // @Param page path int true "page"
-// @Param user_id query string true "user_id"
+// @Param movie_id query string true "movie_id"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=resp.ReviewListResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: not_unique, not_my_review"
-// @Router /rl/api/v1/reviews/user/{page} [get]
+// @Router /rl/api/v1/reviews/movie/{page} [get]
 func (h *Controller) getMovieReviews(c *gin.Context) {
 	ctx := c.Request.Context()
 

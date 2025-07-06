@@ -8,6 +8,25 @@ definitions:
       size:
         type: integer
     type: object
+  rv_internal_domain_dto_movies.MoviesFull:
+    properties:
+      avgRating:
+        type: number
+      genres:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      imgUrl:
+        type: string
+      reviews:
+        items:
+          $ref: '#/definitions/rv_internal_domain_dto_reviews.Review'
+        type: array
+      title:
+        type: string
+    type: object
   rv_internal_domain_dto_movies.MoviesShort:
     properties:
       avgRating:
@@ -44,6 +63,24 @@ definitions:
     - code
     - email
     type: object
+  rv_internal_domain_dto_request.DeleteReviewRequest:
+    properties:
+      id:
+        type: string
+    required:
+    - id
+    type: object
+  rv_internal_domain_dto_request.EditReviewRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      rating:
+        type: integer
+    required:
+    - id
+    type: object
   rv_internal_domain_dto_request.LoginRequest:
     properties:
       email:
@@ -52,6 +89,13 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  rv_internal_domain_dto_request.NewReviewRequest:
+    properties:
+      review:
+        $ref: '#/definitions/rv_internal_domain_dto_reviews.Review'
+    required:
+    - review
     type: object
   rv_internal_domain_dto_request.RegisterCredentials:
     properties:
@@ -71,6 +115,11 @@ definitions:
       newImgUrl:
         type: string
     type: object
+  rv_internal_domain_dto_response.GetMovieFullResponse:
+    properties:
+      movie:
+        $ref: '#/definitions/rv_internal_domain_dto_movies.MoviesFull'
+    type: object
   rv_internal_domain_dto_response.GetMoviesShortResponse:
     properties:
       movies:
@@ -78,15 +127,46 @@ definitions:
           $ref: '#/definitions/rv_internal_domain_dto_movies.MoviesShort'
         type: array
     type: object
+  rv_internal_domain_dto_response.NewReviewResponse:
+    properties:
+      reviewId:
+        type: string
+    type: object
   rv_internal_domain_dto_response.RegisterResponse:
     properties:
       userId:
         type: string
     type: object
+  rv_internal_domain_dto_response.ReviewListResponse:
+    properties:
+      reviews:
+        items:
+          $ref: '#/definitions/rv_internal_domain_dto_reviews.Review'
+        type: array
+    type: object
   rv_internal_domain_dto_response.SendCodeResponse:
     properties:
       nextCodeDelay:
         $ref: '#/definitions/time.Duration'
+    type: object
+  rv_internal_domain_dto_reviews.Review:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      movieId:
+        type: string
+      rating:
+        type: integer
+      userId:
+        type: string
+    required:
+    - description
+    - movieId
+    - rating
     type: object
   rv_internal_domain_services_token.UserTokens:
     properties:
@@ -388,16 +468,52 @@ paths:
       summary: register_user
       tags:
       - auth
+  /rl/api/v1/movies/short/{id}:
+    get:
+      description: получить полную информацию о фильме
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.GetMovieFullResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_movie_full
+      tags:
+      - movies
   /rl/api/v1/movies/short/{page}:
     get:
       description: получить короткие записи о фильмах
       parameters:
-      - description: data
-        in: body
-        name: data
+      - description: page
+        in: path
+        name: page
         required: true
-        schema:
-          $ref: '#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture'
+        type: integer
+      - description: search
+        in: query
+        name: search
+        type: string
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -416,12 +532,210 @@ paths:
                   $ref: '#/definitions/rv_internal_domain_dto_response.GetMoviesShortResponse'
               type: object
         "400":
-          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          description: 'possible codes: bind_path, invalid_X-Request-Id, zero_page'
           schema:
             $ref: '#/definitions/rv_pkg_response.Response'
       summary: get_movies_short
       tags:
-      - user
+      - movies
+  /rl/api/v1/reviews/movie/{page}:
+    get:
+      description: Получить рецензии фильма
+      parameters:
+      - description: page
+        in: path
+        name: page
+        required: true
+        type: integer
+      - description: movie_id
+        in: query
+        name: movie_id
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.ReviewListResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_movie_reviews
+      tags:
+      - reviews
+  /rl/api/v1/reviews/my:
+    delete:
+      description: Удалить рецензию
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.DeleteReviewRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique, not_my_review'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: delete_review
+      tags:
+      - reviews
+    put:
+      description: Отредактировать рецензию
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.EditReviewRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique, not_my_review'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: edit_review
+      tags:
+      - reviews
+  /rl/api/v1/reviews/my/new:
+    post:
+      description: Добавить новую рецензию
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.NewReviewRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.NewReviewResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id, invalid_authorization_header'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: new_review
+      tags:
+      - reviews
+  /rl/api/v1/reviews/user/{page}:
+    get:
+      description: Получить рецензии, оставленные пользователем
+      parameters:
+      - description: page
+        in: path
+        name: page
+        required: true
+        type: integer
+      - description: user_id
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.ReviewListResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique, not_my_review'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_user_reviews
+      tags:
+      - reviews
   /rl/api/v1/user/picture:
     post:
       description: сменить аватарку пользователя
