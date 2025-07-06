@@ -20,6 +20,12 @@ var (
 
 	NoNewPassword = apperror.NewBadRequestError("no new password", "no_new_password")
 	NotUnique     = apperror.NewInvalidDataError("not unique", "not_unique")
+
+	ZeroPage       = apperror.NewBadRequestError("page must be > 0", "zero_page")
+	ReviewNotFound = apperror.NewInvalidDataError("review not found", "review_not_found")
+	NotMyReview    = apperror.NewInvalidDataError("not my review", "not_my_review")
+
+	MovieNotFound = apperror.NewInvalidDataError("movie not found", "movie_not_found")
 )
 
 // коды динамических ошибок:

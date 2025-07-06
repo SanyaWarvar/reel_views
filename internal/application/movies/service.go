@@ -8,10 +8,13 @@ import (
 	moviesRepo "rv/internal/infrastructure/repository/movies"
 	"rv/pkg/applogger"
 	"rv/pkg/trx"
+
+	"github.com/google/uuid"
 )
 
 type movieService interface {
 	GetMoviesShort(ctx context.Context, filter moviesRepo.MovieFilter, page *uint64) ([]movies.MoviesShort, error)
+	GetMovieFull(ctx context.Context, movieId uuid.UUID) (*movies.MoviesFull, error)
 }
 
 type Service struct {
@@ -39,8 +42,8 @@ func (srv *Service) GetMoviesShort(
 	req request.GetMoviesShortRequest,
 	host string,
 ) (*resp.GetMoviesShortResponse, error) {
-	
-	movies, err := srv.movieService.GetMoviesShort(ctx, moviesRepo.MovieFilter{}, &req.Page)
+
+	movies, err := srv.movieService.GetMoviesShort(ctx, moviesRepo.MovieFilter{Search: req.Search}, &req.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -49,5 +52,19 @@ func (srv *Service) GetMoviesShort(
 	}
 	return &resp.GetMoviesShortResponse{
 		Movies: movies,
+	}, nil
+}
+
+func (srv *Service) GetMovieFull(ctx context.Context, req request.GetMovieFullRequest, host string) (*resp.GetMovieFullResponse, error) {
+
+	movie, err := srv.movieService.GetMovieFull(ctx, req.MovieId)
+	if err != nil {
+		return nil, err
+	}
+
+	movie.ImgUrl = host + "statics/images/" + movie.ImgUrl
+
+	return &resp.GetMovieFullResponse{
+		Movie: *movie,
 	}, nil
 }

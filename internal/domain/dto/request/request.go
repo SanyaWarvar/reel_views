@@ -2,6 +2,7 @@ package request
 
 import (
 	"mime/multipart"
+	"rv/internal/domain/dto/reviews"
 
 	"github.com/google/uuid"
 )
@@ -42,6 +43,37 @@ type ChangeProfilePicture struct {
 	UserId uuid.UUID
 }
 
+// GetMoviesShortRequest
+// @Schema
 type GetMoviesShortRequest struct {
-	Page uint64 `json:"page"`
+	Page   uint64 `json:"page"`
+	Search string `json:"search"`
 }
+
+// GetMovieFullRequest
+// @Schema
+type GetMovieFullRequest struct {
+	MovieId uuid.UUID `json:"movieId"`
+}
+
+// NewReviewRequest
+// @Schema
+type NewReviewRequest struct {
+	Review reviews.Review `json:"review" binding:"required"`
+}
+
+// EditReviewRequest
+// @Schema
+type EditReviewRequest struct {
+	Id          uuid.UUID `json:"id" binding:"required"`
+	Description string    `json:"description"`
+	Rating      int       `json:"rating"`
+}
+
+// DeliteReviewRequest
+// @Schema
+type DeliteReviewRequest struct {
+	Id uuid.UUID `json:"id" binding:"required"`
+}
+
+// todo add validation rating

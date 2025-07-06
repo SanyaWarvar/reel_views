@@ -2,6 +2,7 @@ package movies
 
 import (
 	"context"
+	"fmt"
 	"rv/internal/domain/dto/movies"
 	"rv/pkg/database/postgres"
 
@@ -31,29 +32,48 @@ func (repo *Repository) CreateMovie(ctx context.Context, movie Movie) error {
 }
 
 func (repo *Repository) GetMoviesShort(ctx context.Context, movieFilter MovieFilter, offset, limit uint64) ([]movies.MoviesShort, error) {
-	// Субзапрос для жанров
-	genreSubquery, _, err := squirrel.Select("array_agg(g.name)").
+
+	subBuilder := squirrel.Select("array_agg(g.name)").
 		From("movie_genre mg").
 		Join("genres g ON g.id = mg.genre_id").
-		Where("mg.movie_id = m.id").ToSql()
-
+		Where("mg.movie_id = m.id")
+	genreSubquery, args, _ := subBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	// Основной запрос
 	query := squirrel.Select(
 		"m.id, m.title, m.img_url",
 		"("+genreSubquery+") AS genres",
-		"ROUND(AVG(r.rating), 2) AS avg_rating",
+		"coalesce(ROUND(AVG(r.rating), 2), 0) AS avg_rating",
 	).
 		From("movies m").
-		RightJoin("reviews r ON m.id = r.movie_id").
+		LeftJoin("reviews r ON m.id = r.movie_id").
 		GroupBy("m.id").
 		OrderBy("m.created_at")
 
+	if movieFilter.Id != nil {
+		query = query.Where(squirrel.Eq{"m.id": movieFilter.Id})
+	}
+	if len(movieFilter.TitleIn) > 0 {
+		query = query.Where(squirrel.Eq{"m.title": movieFilter.TitleIn})
+	}
+	if movieFilter.RatingGOE != nil {
+		query = query.Where(squirrel.GtOrEq{"avg_rating": *movieFilter.RatingGOE})
+	}
+	if movieFilter.Search != "" {
+		query = query.Where(squirrel.Like{"m.title": fmt.Sprintf("%%%s%%", movieFilter.Search)})
+	}
+	if offset > 0 {
+		query = query.Offset(offset)
+	}
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
 	// Получаем SQL и аргументы
-	sql, args, err := query.ToSql()
+	sql, args, err := query.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
 		return nil, err
 	}
-	// Выполняем запрос
+
 	rows, err := repo.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err

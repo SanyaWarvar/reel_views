@@ -18,10 +18,11 @@ CREATE TABLE IF NOT EXISTS movie_genre(
 );
 
 CREATE TABLE IF NOT EXISTS reviews(
+    id uuid primary key,
     movie_id uuid references movies(id),
     user_id uuid references users(id),
     description text,
     rating integer not null,
     created_at timestamptz not null,
-    primary key(movie_id, user_id)
+    unique(movie_id, user_id)
 );
