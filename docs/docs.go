@@ -927,8 +927,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/rl/api/v1/user/profile/me": {
+            "get": {
+                "description": "получить данные о своем профиле",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get_me",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_user.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/rl/api/v1/user/profile/{id}": {
-            "post": {
+            "get": {
                 "description": "получить юзера по айди",
                 "produces": [
                     "application/json"
@@ -965,7 +1019,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ChangePictureResponse"
+                                            "$ref": "#/definitions/rv_internal_domain_dto_user.User"
                                         }
                                     }
                                 }
@@ -1254,6 +1308,29 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "rv_internal_domain_dto_user.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imgUrl": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
