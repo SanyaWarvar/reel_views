@@ -43,6 +43,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 	{
 		userAuth.POST("/picture", h.changeProfilePicture)
 		user.GET("/profile/:id", h.getUserById)
+		user.GET("/profile/me", h.getMe)
 	}
 }
 
@@ -87,10 +88,10 @@ func (h *Controller) changeProfilePicture(c *gin.Context) {
 // @Produce json
 // @Param id path int true "id"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
+// @Success 200 {object} response.Response{data=user.User}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found"
-// @Router /rl/api/v1/user/profile/{id} [post]
+// @Router /rl/api/v1/user/profile/{id} [get]
 func (h *Controller) getUserById(c *gin.Context) {
 	ctx := c.Request.Context()
 	id, err := uuid.Parse(c.Param("id"))
@@ -100,6 +101,31 @@ func (h *Controller) getUserById(c *gin.Context) {
 	}
 
 	user, err := h.userService.GetUserById(ctx, id, c.Request.Host)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, user))
+}
+
+// @Summary get_me
+// @Description получить данные о своем профиле
+// @Tags user
+// @Produce json
+// @Param Authorization header string true "id"
+// @Param X-Request-Id header string true "Request id identity"
+// @Success 200 {object} response.Response{data=user.User}
+// @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
+// @Router /rl/api/v1/user/profile/me [get]
+func (h *Controller) getMe(c *gin.Context) {
+	ctx := c.Request.Context()
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+	user, err := h.userService.GetUserById(ctx, userId, c.Request.Host)
 	if err != nil {
 		_ = c.Error(err)
 		return
