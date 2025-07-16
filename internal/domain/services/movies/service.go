@@ -16,6 +16,8 @@ import (
 type movieRepo interface {
 	CreateMovie(ctx context.Context, movie moviesRepo.Movie) error
 	GetMoviesShort(ctx context.Context, movieFilter moviesRepo.MovieFilter, offset, limit uint64) ([]movies.MoviesShort, error)
+	GetRecomendationsForMovie(ctx context.Context, movieId uuid.UUID) ([]movies.MoviesShort, error)
+	GetRecomendationsForUser(ctx context.Context, userId uuid.UUID) ([]movies.MoviesShort, error)
 }
 
 type reviewRepo interface {
@@ -71,4 +73,12 @@ func (srv *Service) GetMovieFull(ctx context.Context, movieId uuid.UUID) (*movie
 		AvgRating: current.AvgRating,
 		Reviews:   reviews,
 	}, err
+}
+
+func (srv *Service) GetRecomendationsForMovie(ctx context.Context, movieId uuid.UUID) ([]movies.MoviesShort, error) {
+	return srv.movieRepo.GetRecomendationsForMovie(ctx, movieId)
+}
+
+func (srv *Service) GetRecomendationsForUser(ctx context.Context, userId uuid.UUID) ([]movies.MoviesShort, error) {
+	return srv.movieRepo.GetRecomendationsForUser(ctx, userId)
 }

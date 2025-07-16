@@ -15,6 +15,8 @@ import (
 type movieService interface {
 	GetMoviesShort(ctx context.Context, filter moviesRepo.MovieFilter, page *uint64) ([]movies.MoviesShort, error)
 	GetMovieFull(ctx context.Context, movieId uuid.UUID) (*movies.MoviesFull, error)
+	GetRecomendationsForMovie(ctx context.Context, movieId uuid.UUID) ([]movies.MoviesShort, error)
+	GetRecomendationsForUser(ctx context.Context, userId uuid.UUID) ([]movies.MoviesShort, error)
 }
 
 type Service struct {
@@ -48,7 +50,7 @@ func (srv *Service) GetMoviesShort(
 		return nil, err
 	}
 	for i := range movies {
-		movies[i].ImgUrl = host + "statics/images/" + movies[i].ImgUrl
+		movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
 	}
 	return &resp.GetMoviesShortResponse{
 		Movies: movies,
@@ -62,9 +64,32 @@ func (srv *Service) GetMovieFull(ctx context.Context, req request.GetMovieFullRe
 		return nil, err
 	}
 
-	movie.ImgUrl = host + "statics/images/" + movie.ImgUrl
+	movie.ImgUrl = host + "/statics/images/" + movie.ImgUrl
 
+	recs, err := srv.movieService.GetRecomendationsForMovie(ctx, req.MovieId)
+	if err != nil {
+		return nil, err
+	}
+
+	for ind := range recs {
+		recs[ind].ImgUrl = host + "/statics/images/" + movie.ImgUrl
+	}
 	return &resp.GetMovieFullResponse{
-		Movie: *movie,
+		Movie:          *movie,
+		Recomendations: recs,
+	}, nil
+}
+
+func (srv *Service) GetPersonalRecomedations(ctx context.Context, req request.GetPersonalRecomendationsRequest, host string) (*resp.GetMoviesShortResponse, error) {
+
+	movies, err := srv.movieService.GetRecomendationsForUser(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	for i := range movies {
+		movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
+	}
+	return &resp.GetMoviesShortResponse{
+		Movies: movies,
 	}, nil
 }

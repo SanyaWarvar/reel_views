@@ -381,7 +381,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/movies/short/{id}": {
+        "/rl/api/v1/movies/full/{id}": {
             "get": {
                 "description": "получить полную информацию о фильме",
                 "produces": [
@@ -397,6 +397,60 @@ const docTemplate = `{
                         "description": "id",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rv_internal_domain_dto_response.GetMovieFullResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/rv_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/movies/recomendations/personal/user": {
+            "get": {
+                "description": "получить рекомендации для пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "get_personal_recomendations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -996,6 +1050,9 @@ const docTemplate = `{
                 "imgUrl": {
                     "type": "string"
                 },
+                "similarityScore": {
+                    "type": "number"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -1118,6 +1175,12 @@ const docTemplate = `{
             "properties": {
                 "movie": {
                     "$ref": "#/definitions/rv_internal_domain_dto_movies.MoviesFull"
+                },
+                "recomendations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rv_internal_domain_dto_movies.MoviesShort"
+                    }
                 }
             }
         },

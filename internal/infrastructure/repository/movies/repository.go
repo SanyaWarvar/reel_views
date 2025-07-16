@@ -7,6 +7,7 @@ import (
 	"rv/pkg/database/postgres"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -97,4 +98,78 @@ func (repo *Repository) GetMoviesShort(ctx context.Context, movieFilter MovieFil
 	}
 
 	return output, nil
+}
+
+func (repo *Repository) GetRecomendationsForMovie(ctx context.Context, movieId uuid.UUID) ([]movies.MoviesShort, error) {
+	query := `
+	select m.id, m.title, m.img_url, 
+	(select array_agg(g.name) from movie_genre mg join genres g on g.id = mg.genre_id where mg.movie_id = m.id) as genres,
+	coalesce(ROUND(AVG(r2.rating), 2), 0) AS avg_rating,
+	ROUND(r.similarity_score::numeric, 2) as similarity_score
+	from get_similar_movies($1) r 
+	join movies m on m.id = r.similar_movie_id
+	left join reviews r2 on r2.movie_id = m.id
+	group by m.id, r.similarity_score
+	order by r.similarity_score desc
+	`
+	rows, err := repo.conn.Query(ctx, query, movieId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var output []movies.MoviesShort
+	for rows.Next() {
+		var m movies.MoviesShort
+		err := rows.Scan(
+			&m.Id,
+			&m.Title,
+			&m.ImgUrl,
+			&m.Genres,
+			&m.AvgRating,
+			&m.SimilarityScore,
+		)
+		if err != nil {
+			return nil, err
+		}
+		output = append(output, m)
+	}
+	return output, err
+}
+
+func (repo *Repository) GetRecomendationsForUser(ctx context.Context, userId uuid.UUID) ([]movies.MoviesShort, error) {
+	query := `
+	select m.id, m.title, m.img_url, 
+	(select array_agg(g.name) from movie_genre mg join genres g on g.id = mg.genre_id where mg.movie_id = m.id) as genres,
+	coalesce(ROUND(AVG(r2.rating), 2), 0) AS avg_rating,
+	ROUND(r.similarity_score::numeric, 2) as similarity_score
+	from get_similar_movies($1) r 
+	join movies m on m.id = r.similar_movie_id
+	left join reviews r2 on r2.movie_id = m.id
+	group by m.id, r.similarity_score
+	order by r.similarity_score desc
+	`
+	rows, err := repo.conn.Query(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var output []movies.MoviesShort
+	for rows.Next() {
+		var m movies.MoviesShort
+		err := rows.Scan(
+			&m.Id,
+			&m.Title,
+			&m.ImgUrl,
+			&m.Genres,
+			&m.AvgRating,
+			&m.SimilarityScore,
+		)
+		if err != nil {
+			return nil, err
+		}
+		output = append(output, m)
+	}
+	return output, err
 }

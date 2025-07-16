@@ -27,7 +27,8 @@ type GetMoviesShortResponse struct {
 // GetMovieFullResponse
 // @Schema
 type GetMovieFullResponse struct {
-	Movie movies.MoviesFull `json:"movie"`
+	Movie          movies.MoviesFull    `json:"movie"`
+	Recomendations []movies.MoviesShort `json:"recomendations"`
 }
 
 type NewReviewResponse struct {

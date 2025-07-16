@@ -39,6 +39,8 @@ definitions:
         type: string
       imgUrl:
         type: string
+      similarityScore:
+        type: number
       title:
         type: string
     type: object
@@ -119,6 +121,10 @@ definitions:
     properties:
       movie:
         $ref: '#/definitions/rv_internal_domain_dto_movies.MoviesFull'
+      recomendations:
+        items:
+          $ref: '#/definitions/rv_internal_domain_dto_movies.MoviesShort'
+        type: array
     type: object
   rv_internal_domain_dto_response.GetMoviesShortResponse:
     properties:
@@ -468,7 +474,7 @@ paths:
       summary: register_user
       tags:
       - auth
-  /rl/api/v1/movies/short/{id}:
+  /rl/api/v1/movies/full/{id}:
     get:
       description: получить полную информацию о фильме
       parameters:
@@ -499,6 +505,39 @@ paths:
           schema:
             $ref: '#/definitions/rv_pkg_response.Response'
       summary: get_movie_full
+      tags:
+      - movies
+  /rl/api/v1/movies/recomendations/personal/user:
+    get:
+      description: получить рекомендации для пользователя
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.GetMovieFullResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_path, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: get_personal_recomendations
       tags:
       - movies
   /rl/api/v1/movies/short/{page}:

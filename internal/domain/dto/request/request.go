@@ -77,3 +77,9 @@ type DeleteReviewRequest struct {
 }
 
 // todo add validation rating
+
+// GetMoviesShortRequest
+// @Schema
+type GetPersonalRecomendationsRequest struct {
+	UserId uuid.UUID `json:"userId"`
+}
