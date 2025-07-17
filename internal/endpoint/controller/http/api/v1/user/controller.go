@@ -43,7 +43,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 	{
 		userAuth.POST("/picture", h.changeProfilePicture)
 		user.GET("/profile/:id", h.getUserById)
-		user.GET("/profile/me", h.getMe)
+		userAuth.GET("/profile/me", h.getMe)
 	}
 }
 
@@ -117,6 +117,7 @@ func (h *Controller) getUserById(c *gin.Context) {
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=user.User}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
+// @Failure 401 {object} response.Response{} "possible codes: invalid authorization header"
 // @Router /rl/api/v1/user/profile/me [get]
 func (h *Controller) getMe(c *gin.Context) {
 	ctx := c.Request.Context()
