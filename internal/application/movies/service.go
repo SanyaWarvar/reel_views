@@ -48,10 +48,10 @@ func (srv *Service) GetMoviesShort(
 	movies, err := srv.movieService.GetMoviesShort(ctx, moviesRepo.MovieFilter{Search: req.Search}, &req.Page)
 	if err != nil {
 		return nil, err
-	}
-	for i := range movies {
-		movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
-	}
+	} /*
+		for i := range movies {
+			movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
+		}*/
 	return &resp.GetMoviesShortResponse{
 		Movies: movies,
 	}, nil
@@ -63,17 +63,17 @@ func (srv *Service) GetMovieFull(ctx context.Context, req request.GetMovieFullRe
 	if err != nil {
 		return nil, err
 	}
-
-	movie.ImgUrl = host + "/statics/images/" + movie.ImgUrl
+	/*
+		movie.ImgUrl = host + "/statics/images/" + movie.ImgUrl*/
 
 	recs, err := srv.movieService.GetRecomendationsForMovie(ctx, req.MovieId)
 	if err != nil {
 		return nil, err
 	}
-
-	for ind := range recs {
-		recs[ind].ImgUrl = host + "/statics/images/" + movie.ImgUrl
-	}
+	/*
+		for ind := range recs {
+			recs[ind].ImgUrl = host + "/statics/images/" + movie.ImgUrl
+		}*/
 	return &resp.GetMovieFullResponse{
 		Movie:          *movie,
 		Recomendations: recs,
@@ -85,10 +85,10 @@ func (srv *Service) GetPersonalRecomedations(ctx context.Context, req request.Ge
 	movies, err := srv.movieService.GetRecomendationsForUser(ctx, req.UserId)
 	if err != nil {
 		return nil, err
-	}
-	for i := range movies {
-		movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
-	}
+	} /*
+		for i := range movies {
+			movies[i].ImgUrl = host + "/statics/images/" + movies[i].ImgUrl
+		}*/
 	return &resp.GetMoviesShortResponse{
 		Movies: movies,
 	}, nil
