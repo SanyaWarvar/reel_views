@@ -142,12 +142,12 @@ func (repo *Repository) GetRecomendationsForUser(ctx context.Context, userId uui
 	select m.id, m.title, m.img_url, 
 	(select array_agg(g.name) from movie_genre mg join genres g on g.id = mg.genre_id where mg.movie_id = m.id) as genres,
 	coalesce(ROUND(AVG(r2.rating), 2), 0) AS avg_rating,
-	ROUND(r.similarity_score::numeric, 2) as similarity_score
-	from get_similar_movies($1) r 
-	join movies m on m.id = r.similar_movie_id
+	ROUND(r.similarity_percent::numeric, 2) as similarity_score
+	from get_simple_recs($1) r 
+	join movies m on m.id = r.recommended_movie_id
 	left join reviews r2 on r2.movie_id = m.id
-	group by m.id, r.similarity_score
-	order by r.similarity_score desc
+	group by m.id, r.similarity_percent
+	order by r.similarity_percent desc
 	`
 	rows, err := repo.conn.Query(ctx, query, userId)
 	if err != nil {
